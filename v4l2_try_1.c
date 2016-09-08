@@ -2,6 +2,7 @@
 #include<linux/videodev2.h>
 #include<stdio.h>
 #include<fcntl.h>
+#include<stdlib.h>
 //#include<sys/ioctl.h>
 #define	DEV "/dev/video0"		//设备名
 #define HEIGHT 640		//图像高度
@@ -58,7 +59,30 @@ int main(int argc, char* argv[]){
 	req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	req.memory = V4L2_MEMORY_MMAP;
 	if(ioctl(fd,VIDIOC_REQBUFS,&req)==-1){
-		printf("request for buffers error\n");
+		printf("request for buffers error. maybe device nonsupport mmap\n");
+	}
+	struct buffer {
+		void* start;
+		unsigned int length;
+	} * buffers;
+	buffers = malloc(req.count * sizeof(*buffers));
+	if (!buffers){
+		printf("error: at buffers\n");
+		return -1;
+	}
+	int n_buffers = 0;
+	for (n_buffers = 0; n_buffers < req.count; n_buffers++) {
+		struct v4l2_buffer buf;
+		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		buf.memory = V4L2_MEMORY_MMAP;
+		buf.index = n_buffers;
+		
+		if (ioctl (fd, VIDIOC_QUERYBUF, &buf) == -1){
+			printf("error: at VIDIOC_QUERYBUF\n");
+			return -1;
+		}
+		
+
 	}
 	close(fd);
 }
