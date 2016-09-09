@@ -82,7 +82,12 @@ int main(int argc, char* argv[]){
 			return -1;
 		}
 		
-
+		buffers[n_buffers].length = buf.length;
+		buffers[n_buffers].start = mmap(NULL,buf.length,PROT_READ |PROT_WRITE, MAP_SHARED, fd, buf.m.offset);
+		if(buffers[n_buffers].start == -1){
+			printf("error: at mmap[%d]",n_buffers);
+		}
+		
 	}
 	close(fd);
 }
